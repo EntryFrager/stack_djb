@@ -1,4 +1,10 @@
+/// @file main.cpp
+
 #include "stack.h"
+
+/**
+ * Main entry point of the program.
+*/
 
 int main ()
 {

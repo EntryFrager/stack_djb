@@ -1,4 +1,10 @@
+/// @file stack.cpp
+
 #include "stack.h"
+
+/**
+ * types of errors
+*/
 
 static const char *err_msgs_arr[] = {
     "NO ERROR.\n",
@@ -20,7 +26,13 @@ static const char *err_msgs_arr[] = {
     "ERROR: error when checking stack data->right_canary\n"
 };
 
-static const char *fp_err_name = "file_err.txt";
+static const char *fp_err_name = "file_err.txt";                                                                        ///< Variable storing the file name for error output.
+
+/**
+ * Function to create a stack.
+ * @param[in] stk
+ * @param[in] capacity
+*/
 
 void stack_ctor (STACK *stk, size_t capacity)
 {
@@ -56,6 +68,11 @@ void stack_ctor (STACK *stk, size_t capacity)
     assert_stack (stk);
 }
 
+/**
+ * Stack cleaning function.
+ * @param[in] stk
+*/
+
 void stack_dtor (STACK *stk)
 {
     my_assert (stk->data != NULL);
@@ -64,12 +81,12 @@ void stack_dtor (STACK *stk)
     free (stk->data);
 
 #ifdef CANARIES_CHECK
-    stk->left_canary = STACK_VALUE_VENOM;
+    stk->left_canary  = STACK_VALUE_VENOM;
     stk->right_canary = STACK_VALUE_VENOM;
 #endif
 
 #ifdef HASH_CHECK
-    stk->hash_data = STACK_VALUE_VENOM;
+    stk->hash_data   = STACK_VALUE_VENOM;
     stk->hash_struct = STACK_VALUE_VENOM;
 #endif
 
@@ -77,6 +94,12 @@ void stack_dtor (STACK *stk)
     stk->size = STACK_VALUE_VENOM;
     stk->position = STACK_VALUE_VENOM;
 }
+
+/**
+ * Function to add a new element to the stack.
+ * @param[in] stk
+ * @param[in] value
+*/
 
 void stack_push (STACK *stk, ELEMENT value)
 {
@@ -97,10 +120,13 @@ void stack_push (STACK *stk, ELEMENT value)
     assert_stack (stk);
 }
 
+/**
+ * Function that returns the last element added.
+ * @param[in] stk
+*/
+
 ELEMENT stack_pop (STACK *stk)
 {
-    assert_stack (stk);
-
     if (stk->position < stk->size / 3)
     {
         stack_realloc (stk, stk->position);
@@ -119,6 +145,12 @@ ELEMENT stack_pop (STACK *stk)
 
     return elem_pop;
 }
+
+/**
+ * A function that changes the stack size.
+ * @param[in] stk
+ * @param[in] size
+*/
 
 void stack_realloc (STACK *stk, int size)
 {
@@ -153,6 +185,12 @@ void stack_realloc (STACK *stk, int size)
 
 #ifdef HASH_CHECK
 
+/**
+ * Function that creates a hash of an array of stack elements.
+ * @param[in] stk
+ * @param[out] hash_data
+*/
+
 HASH_TYPE hash_control_data (STACK *stk)
 {
     my_assert (stk != NULL);
@@ -161,11 +199,17 @@ HASH_TYPE hash_control_data (STACK *stk)
 
     for (int i = 0; i < stk->position; i++)
     {
-        hash_data += djb (stk->data[i]);
+        hash_data += hash_djb (stk->data[i]);
     }
 
     return hash_data;
 }
+
+/**
+ * Function that creates a hash of a structure.
+ * @param[in] stk
+ * @param[out] hash
+*/
 
 HASH_TYPE hash_control_struct (STACK *stk)
 {
@@ -178,12 +222,18 @@ HASH_TYPE hash_control_struct (STACK *stk)
         data += stk->data[i];
     }
 
-    HASH_TYPE hash = djb (data + stk->position + stk->size);
+    HASH_TYPE hash = hash_djb (data + stk->position + stk->size);
 
     return hash;
 }
 
-HASH_TYPE djb(int str)
+/**
+ * Hash generating function.
+ * @param[in] str
+ * @param[out] hash
+*/
+
+HASH_TYPE hash_djb(int str)
 {
     unsigned long hash = 5381;
 
@@ -195,6 +245,12 @@ HASH_TYPE djb(int str)
     return hash;
 }
 #endif
+
+/**
+ * Function that checks the stack for errors.
+ * @param[in] stk
+ * @param[out] code_error
+*/
 
 int stack_verification (STACK *stk)
 {
@@ -224,11 +280,6 @@ int stack_verification (STACK *stk)
     if (stk->left_canary != CANARY && stk->right_canary != CANARY)
     {
         return STACK_CANARY_ERR;
-    }
-
-    if (stk->left_canary != CANARY)
-    {
-        return STACK_LEFT_CANARY_ERR;
     }
 
     if (stk->right_canary != CANARY)
@@ -278,13 +329,24 @@ int stack_verification (STACK *stk)
     return STACK_OK;
 }
 
+/**
+ * Function that prints error and stack information.
+ * @param[in] stk
+ * @param[in] code_error
+ * @param[in] file_err
+ * @param[in] func_err
+ * @param[in] line_err
+*/
+
 void stack_dump (STACK *stk, const int code_error, const char *file_err, const char *func_err, const int line_err)
 {
     FILE *fp_err = fopen (fp_err_name, "a");
+
     if (fp_err == NULL)
     {
         fprintf (stderr, "%s", err_msgs_arr[FILE_OPEN_ERR]);
     }
+    
     if (stk != NULL)
     {
         if (code_error < ERROR_CNT)
@@ -297,6 +359,7 @@ void stack_dump (STACK *stk, const int code_error, const char *file_err, const c
         }
 
         fprintf (fp_err, "stack[%p] \"stk\" called from %s(%d) %s\n", stk, file_err, line_err, func_err);
+
         fprintf (fp_err, "{\n");
 
 #ifdef CANARIES_CHECK
@@ -312,7 +375,7 @@ void stack_dump (STACK *stk, const int code_error, const char *file_err, const c
             fprintf (fp_err, "\t{\n");
 
 #ifdef CANARIES_CHECK
-            fprintf (fp_err, "\t\tdata->left_canary = %x\n", stk->data[-1]);
+            fprintf (fp_err, "\t\tdata->left_canary = %llx\n", stk->data[-1]);
 #endif
 
             if (stk->size > 0)
@@ -322,18 +385,24 @@ void stack_dump (STACK *stk, const int code_error, const char *file_err, const c
                     fprintf (fp_err, "\t\t*[%d] = %d\n", i, stk->data[i]);
                 }
             }
+            else if (stk->position > 0)
+            {
+                for (int i = 0; i < stk->position; i++)
+                {
+                    fprintf (fp_err, "\t\t*[%d] = %d\n", i, stk->data[i]);
+                }
+            }
 
 #ifdef CANARIES_CHECK
-            fprintf (fp_err, "\t\tdata->right_canary = %x\n", stk->data[stk->size]);
+            fprintf (fp_err, "\t\tdata->right_canary = %llx\n", stk->data[stk->size]);
 #endif
 
+            fprintf (fp_err, "\t}\n");
         }
         else 
         {
             fprintf (fp_err, "\tdata[NULL]\n");
         }
-
-        fprintf (fp_err, "\t}\n");
 
 #ifdef HASH_CHECK
         fprintf (fp_err, "\tstack->hash_struct = %llu\n", stk->hash_struct);
@@ -341,10 +410,10 @@ void stack_dump (STACK *stk, const int code_error, const char *file_err, const c
 #endif
 
 #ifdef CANARIES_CHECK
-        fprintf (fp_err, "\tstack->right_canary = %x\n", stk->right_canary);
+        fprintf (fp_err, "\tstack->right_canary = %llx\n", stk->right_canary);
 #endif
 
-        fprintf (fp_err, "}\n");
+        fprintf (fp_err, "}\n\n-----------------------------------------------------------\n");
 
         if (fclose (fp_err) != 0)
         {

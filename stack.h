@@ -1,3 +1,5 @@
+/// @file stack.h
+
 #ifndef STACK_H
 #define STACK_H
 
@@ -6,103 +8,103 @@
 #include <math.h>
 #include <string.h>
 
-#define CANARIES_CHECK
+#define CANARIES_CHECK                                                                                                  ///< Macro to enable canary protection.
 
-#define HASH_CHECK
+#define HASH_CHECK                                                                                                      ///< Macro to enable hashed protection.
 
 #ifdef CANARIES_CHECK
-    typedef unsigned long long CANARY_TYPE;
+    typedef unsigned long long CANARY_TYPE;                                                                             ///< Type of canaries.
 
-    const CANARY_TYPE CANARY = 0xDEADBEEF;
+    const CANARY_TYPE CANARY = 0xDEADBEEF;                                                                              ///< The meaning of canaries.
 #endif
 
 #ifdef HASH_CHECK
-    typedef unsigned long long HASH_TYPE;
+    typedef unsigned long long HASH_TYPE;                                                                               ///< Hash type.
 #endif
 
-static int CODE_ERROR = 0;
+static int CODE_ERROR = 0;                                                                                              ///< Variable for error codes.
 
-#define assert_stack(stack) { \
-    if ((CODE_ERROR = stack_verification (stack)) != STACK_OK) \
-    {   \
-        stack_dump (stack, CODE_ERROR, __FILE__, __func__, __LINE__); \
-        abort (); \
-    }   \
+#define assert_stack(stack) {                                           \
+    if ((CODE_ERROR = stack_verification (stack)) != STACK_OK)          \
+    {                                                                   \
+        stack_dump (stack, CODE_ERROR, __FILE__, __func__, __LINE__);   \
+        abort ();                                                       \
+    }                                                                   \
 }
 
-#define my_assert(expr) if (!(expr)) {  \
+#define my_assert(expr) if (!(expr)) {                                                               \
     fprintf(stderr, "%s %s:%d: My assertion failed: \"" #expr "\"\n", __FILE__, __func__, __LINE__); \
-    exit(1); \
+    exit(1);                                                                                         \
 }
 
-typedef int ELEMENT;
+typedef int ELEMENT;                                                                                                    ///< The type of stack elements.
 
-const ELEMENT STACK_VALUE_VENOM = -100000;
+const ELEMENT STACK_VALUE_VENOM = -100000;                                                                              ///< Variable containing poison
 
-typedef struct {
+typedef struct {                                                                                                        ///< Structure containing stack values.            
 #ifdef CANARIES_CHECK
-    CANARY_TYPE left_canary = CANARY;
+    CANARY_TYPE left_canary = CANARY;                                                                                   ///< Variable storing the value of the left canary.
 #endif
 
-    ELEMENT *data = NULL;
+    ELEMENT *data = NULL;                                                                                               ///< Array with stack elements.
 
-    int size = STACK_VALUE_VENOM;
-    int position = STACK_VALUE_VENOM;
+    int size = STACK_VALUE_VENOM;                                                                                       ///< Stack size.
+    int position = STACK_VALUE_VENOM;                                                                                   ///< The position on the stack at which the next element is written.
 
 #ifdef HASH_CHECK
-    HASH_TYPE hash_data = STACK_VALUE_VENOM;
-    HASH_TYPE hash_struct = STACK_VALUE_VENOM;
+    HASH_TYPE hash_data = STACK_VALUE_VENOM;                                                                            ///< Variable storing the hash value of an array with stack elements.
+    HASH_TYPE hash_struct = STACK_VALUE_VENOM;                                                                          ///< Variable storing the structure hash value.
 #endif
 
 #ifdef CANARIES_CHECK
-    CANARY_TYPE right_canary = CANARY;
+    CANARY_TYPE right_canary = CANARY;                                                                                  ///< Variable storing the value of the right canary.
 #endif
 } STACK;
 
-enum code_error
+enum code_error                                                                                                         ///< Error codes.                                                                               
 {
-    STACK_OK,
-    STACK_ERR,
-    STACK_DATA_ERR,
-    STACK_SIZE_ERR,
-    STACK_POSITION_ERR,
-    STACK_SIZE_POS_ERR,
-    FILE_OPEN_ERR,
-    FILE_CLOSE_ERR,
-    STACK_POINTER_GARBAGE,
+    STACK_OK,                                                                                                           ///< No error.
+    STACK_ERR,                                                                                                          ///< Null stack pointer.
+    STACK_DATA_ERR,                                                                                                     ///< Null pointer to an array of stack elements.
+    STACK_SIZE_ERR,                                                                                                     ///< Invalid stack size value.
+    STACK_POSITION_ERR,                                                                                                 ///< Invalid stack position value.
+    STACK_SIZE_POS_ERR,                                                                                                 ///< Stack size is less than position.  
+    FILE_OPEN_ERR,                                                                                                      ///< Error opening file.
+    FILE_CLOSE_ERR,                                                                                                     ///< Error closing file.
+    STACK_POINTER_GARBAGE,                                                                                              ///< Stack not created.
 
-    STACK_HASH_STRUCT_ERR,
-    STACK_HASH_DATA_ERR,
-    STACK_CANARY_ERR,   
-    STACK_LEFT_CANARY_ERR,
-    STACK_RIGHT_CANARY_ERR,
-    STACK_DATA_CANARY_ERR,   
-    STACK_DATA_LEFT_CANARY_ERR,
-    STACK_DATA_RIGHT_CANARY_ERR,
+    STACK_HASH_STRUCT_ERR,                                                                                              ///< Invalid structure hash value.
+    STACK_HASH_DATA_ERR,                                                                                                ///< Invalid array hash value with stack elements.
+    STACK_CANARY_ERR,                                                                                                   ///< The canaries died.
+    STACK_LEFT_CANARY_ERR,                                                                                              ///< The left canary has died.  
+    STACK_RIGHT_CANARY_ERR,                                                                                             ///< The right canary has died.
+    STACK_DATA_CANARY_ERR,                                                                                              ///< Canaries in an array with stack elements have died.
+    STACK_DATA_LEFT_CANARY_ERR,                                                                                         ///< The left canary in an array with stack elements has died.
+    STACK_DATA_RIGHT_CANARY_ERR,                                                                                        ///< The right canary in an array with stack elements has died.
 };
 
-const int ERROR_CNT = 16;
+const int ERROR_CNT = 16;                                                                                               ///< Constant indicating the number of possible errors.
 
-void stack_ctor (STACK *stk, size_t capacity);
+void stack_ctor (STACK *stk, size_t capacity);                                                                          ///< Stack creation function.
 
-void stack_dtor (STACK *stk);
+void stack_dtor (STACK *stk);                                                                                           ///< Stack clearing function.
 
-void stack_push (STACK *stk, ELEMENT value);
+void stack_push (STACK *stk, ELEMENT value);                                                                            ///< Function that adds an element to the stack.
 
-ELEMENT stack_pop (STACK *stk);
+ELEMENT stack_pop (STACK *stk);                                                                                         ///< Function that returns the last element added.
 
-void stack_realloc (STACK *stk, int size);
+void stack_realloc (STACK *stk, int size);                                                                              ///< A function that changes the stack size.
 
-#ifdef HASH_CHECK
-HASH_TYPE hash_control_data (STACK *stk);
+#ifdef HASH_CHECK  
+HASH_TYPE hash_control_data (STACK *stk);                                                                               ///< Function that creates a hash of an array of stack elements.
 
-HASH_TYPE hash_control_struct (STACK *stk);
+HASH_TYPE hash_control_struct (STACK *stk);                                                                             ///< Function that creates a hash of a structure.
 
-HASH_TYPE djb(int str);
+HASH_TYPE hash_djb(int str);                                                                                            ///< Hash generating function.
 #endif
 
-int stack_verification (STACK *stk);
+int stack_verification (STACK *stk);                                                                                    ///< Function that checks the stack for errors.
 
-void stack_dump (STACK *stk, const int code_error, const char *file_err, const char *func_err, const int line_err);
+void stack_dump (STACK *stk, const int code_error, const char *file_err, const char *func_err, const int line_err);     ///< Function that prints error and stack information.
 
 #endif // STACK_H
