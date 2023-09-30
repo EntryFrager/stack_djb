@@ -6,7 +6,7 @@
  * types of errors
 */
 
-static const char *err_msgs_arr[] = {
+static const char *err_msgs_arr[] = {                                                                                   ///< Constant containing error messages.
     "NO ERROR.\n",
     "ERROR: null pointer to stack.\n",
     "ERROR: null pointer to stack data.\n",
@@ -34,7 +34,7 @@ static const char *fp_err_name = "file_err.txt";                                
  * @param[in] capacity
 */
 
-void stack_ctor (STACK *stk, size_t capacity)
+void stack_ctor (STACK *stk, const size_t capacity)
 {
     my_assert (stk != NULL);
     my_assert (stk->data == NULL);
@@ -45,7 +45,6 @@ void stack_ctor (STACK *stk, size_t capacity)
 
     *((CANARY_TYPE *) stk->data) = CANARY;
     *((CANARY_TYPE *)(stk->data + capacity + 1)) = CANARY;
-    stk->data = (ELEMENT *) stk->data;
     stk->data++;
 
     stk->left_canary = CANARY;
@@ -101,7 +100,7 @@ void stack_dtor (STACK *stk)
  * @param[in] value
 */
 
-void stack_push (STACK *stk, ELEMENT value)
+void stack_push (STACK *stk, const ELEMENT value)
 {
     assert_stack (stk);
 
@@ -127,6 +126,8 @@ void stack_push (STACK *stk, ELEMENT value)
 
 ELEMENT stack_pop (STACK *stk)
 {
+    assert_stack (stk);
+    
     if (stk->position < stk->size / 3)
     {
         stack_realloc (stk, stk->position);
@@ -152,7 +153,7 @@ ELEMENT stack_pop (STACK *stk)
  * @param[in] size
 */
 
-void stack_realloc (STACK *stk, int size)
+void stack_realloc (STACK *stk, const int size)
 {
     assert_stack (stk);
 
@@ -239,7 +240,7 @@ HASH_TYPE hash_djb(int str)
 
     for (int i = 0; i < str; i++)
     {
-        hash = ((hash << 5) + hash) + i;
+        hash = (1 + hash) + i;
     }
 
     return hash;
@@ -285,6 +286,11 @@ int stack_verification (STACK *stk)
     if (stk->right_canary != CANARY)
     {
         return STACK_RIGHT_CANARY_ERR;
+    }
+
+    if (stk->left_canary != CANARY)
+    {
+        return STACK_LEFT_CANARY_ERR;
     }
 #endif
 

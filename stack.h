@@ -12,16 +12,6 @@
 
 #define HASH_CHECK                                                                                                      ///< Macro to enable hashed protection.
 
-#ifdef CANARIES_CHECK
-    typedef unsigned long long CANARY_TYPE;                                                                             ///< Type of canaries.
-
-    const CANARY_TYPE CANARY = 0xDEADBEEF;                                                                              ///< The meaning of canaries.
-#endif
-
-#ifdef HASH_CHECK
-    typedef unsigned long long HASH_TYPE;                                                                               ///< Hash type.
-#endif
-
 static int CODE_ERROR = 0;                                                                                              ///< Variable for error codes.
 
 #define assert_stack(stack) {                                           \
@@ -40,6 +30,16 @@ static int CODE_ERROR = 0;                                                      
 typedef int ELEMENT;                                                                                                    ///< The type of stack elements.
 
 const ELEMENT STACK_VALUE_VENOM = -100000;                                                                              ///< Variable containing poison
+
+#ifdef CANARIES_CHECK
+    typedef unsigned long long CANARY_TYPE;                                                                             ///< Type of canaries.
+
+    const CANARY_TYPE CANARY = 0xDEADBEEF;                                                                              ///< The meaning of canaries.
+#endif
+
+#ifdef HASH_CHECK
+    typedef unsigned long long HASH_TYPE;                                                                               ///< Hash type.
+#endif
 
 typedef struct {                                                                                                        ///< Structure containing stack values.            
 #ifdef CANARIES_CHECK
@@ -85,15 +85,15 @@ enum code_error                                                                 
 
 const int ERROR_CNT = 16;                                                                                               ///< Constant indicating the number of possible errors.
 
-void stack_ctor (STACK *stk, size_t capacity);                                                                          ///< Stack creation function.
+void stack_ctor (STACK *stk, const size_t capacity);                                                                    ///< Stack creation function.
 
 void stack_dtor (STACK *stk);                                                                                           ///< Stack clearing function.
 
-void stack_push (STACK *stk, ELEMENT value);                                                                            ///< Function that adds an element to the stack.
+void stack_push (STACK *stk, const ELEMENT value);                                                                      ///< Function that adds an element to the stack.
 
 ELEMENT stack_pop (STACK *stk);                                                                                         ///< Function that returns the last element added.
 
-void stack_realloc (STACK *stk, int size);                                                                              ///< A function that changes the stack size.
+void stack_realloc (STACK *stk, const int size);                                                                        ///< A function that changes the stack size.
 
 #ifdef HASH_CHECK  
 HASH_TYPE hash_control_data (STACK *stk);                                                                               ///< Function that creates a hash of an array of stack elements.
