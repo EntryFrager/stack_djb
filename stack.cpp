@@ -59,10 +59,8 @@ void stack_ctor (STACK *stk, const size_t capacity)
     stk->size = capacity;
     stk->position = 0;
 
-#ifdef HASH_CHECK
-    stk->hash_data = hash_control_data (stk);
-    stk->hash_struct = hash_control_struct (stk);
-#endif
+    ON_DEBUG (stk->hash_data = hash_control_data (stk),
+              stk->hash_struct = hash_control_struct (stk));
 
     assert_stack (stk);
 }
@@ -84,10 +82,8 @@ void stack_dtor (STACK *stk)
     stk->right_canary = STACK_VALUE_VENOM;
 #endif
 
-#ifdef HASH_CHECK
-    stk->hash_data   = STACK_VALUE_VENOM;
-    stk->hash_struct = STACK_VALUE_VENOM;
-#endif
+    ON_DEBUG (stk->hash_data = STACK_VALUE_VENOM,
+              stk->hash_struct = STACK_VALUE_VENOM);
 
     stk->data = NULL;
     stk->size = STACK_VALUE_VENOM;
@@ -111,10 +107,8 @@ void stack_push (STACK *stk, const ELEMENT value)
 
     stk->data[stk->position++] = value;
 
-#ifdef HASH_CHECK
-    stk->hash_data = hash_control_data (stk);
-    stk->hash_struct = hash_control_struct (stk);
-#endif
+    ON_DEBUG (stk->hash_data = hash_control_data (stk),
+              stk->hash_struct = hash_control_struct (stk));
 
     assert_stack (stk);
 }
@@ -137,10 +131,8 @@ ELEMENT stack_pop (STACK *stk)
 
     stk->data[stk->position] = 0;
 
-#ifdef HASH_CHECK
-    stk->hash_data = hash_control_data (stk);
-    stk->hash_struct = hash_control_struct (stk);
-#endif
+    ON_DEBUG (stk->hash_data = hash_control_data (stk),
+              stk->hash_struct = hash_control_struct (stk));
 
     assert_stack (stk);
 
@@ -176,10 +168,8 @@ void stack_realloc (STACK *stk, const int size)
 
     stk->size = size;
 
-#ifdef HASH_CHECK
-    stk->hash_data = hash_control_data (stk);
-    stk->hash_struct = hash_control_struct (stk);
-#endif
+    ON_DEBUG (stk->hash_data = hash_control_data (stk),
+              stk->hash_struct = hash_control_struct (stk));
 
     assert_stack (stk);
 }
@@ -410,10 +400,8 @@ void stack_dump (STACK *stk, const int code_error, const char *file_err, const c
             fprintf (fp_err, "\tdata[NULL]\n");
         }
 
-#ifdef HASH_CHECK
-        fprintf (fp_err, "\tstack->hash_struct = %llu\n", stk->hash_struct);
-        fprintf (fp_err, "\tstack->hash_data = %llu\n", stk->hash_data);
-#endif
+        ON_DEBUG (fprintf (fp_err, "\tstack->hash_struct = %llu\n", stk->hash_struct),
+                  fprintf (fp_err, "\tstack->hash_data = %llu\n", stk->hash_data));
 
 #ifdef CANARIES_CHECK
         fprintf (fp_err, "\tstack->right_canary = %llx\n", stk->right_canary);

@@ -12,6 +12,13 @@
 
 #define HASH_CHECK                                                                                                      ///< Macro to enable hashed protection.
 
+#ifdef HASH_CHECK
+    #define ON_DEBUG(...)                                         \
+    __VA_ARGS__
+#else
+    #define ON_DEBUG(...)
+#endif
+
 static int CODE_ERROR = 0;                                                                                              ///< Variable for error codes.
 
 #define assert_stack(stack) {                                           \

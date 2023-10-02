@@ -10,18 +10,20 @@ int main ()
 {
     STACK stack = {};
 
+    stack.left_canary = 10;
+
     stack_ctor (&stack, 5);
 
     assert_stack (&stack);
 
-    for (int i = 0; i < 7; i++)
+    for (int i = 0; i < 100; i++)
     {
         stack_push (&stack, (ELEMENT) i);
     }
 
     assert_stack (&stack);
 
-    for (int i = 0; i < 7; i++)
+    for (int i = 0; i < 100; i++)
     {
         ELEMENT stack_elem = stack_pop(&stack);
 
